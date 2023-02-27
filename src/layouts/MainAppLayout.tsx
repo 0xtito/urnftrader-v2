@@ -1,9 +1,5 @@
 import React from "react";
-import { Html } from "next/document";
-
-type PropsObject = {
-  children: any;
-};
+import { PropsObject } from "../interfaces";
 
 function MainAppLayout(props: PropsObject) {
   return (
