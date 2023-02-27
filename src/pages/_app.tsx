@@ -1,22 +1,28 @@
 import "../styles/index.css";
 import type { AppProps } from "next/app";
 import NextHead from "next/head";
-import * as React from "react";
+import { useEffect, useState } from "react";
 import { WagmiConfig } from "wagmi";
-import { useRouter } from "next/router";
 
 import { client } from "../wagmi";
-// import { LandingPageLayout, MainAppLayout } from "./layouts"
-import LandingPageLayout from "../layouts/LandingPageLayout";
-import MainAppLayout from "../layouts/MainAppLayout";
+import { createClient } from "@reservoir0x/reservoir-sdk";
+
+createClient({
+  chains: [
+    {
+      id: 1,
+      baseApiUrl: "https://api.reservoir.tools",
+      default: true,
+      apiKey: process.env.MAINNET_RESERVOIR_API_KEY,
+    },
+  ],
+  source: "YOUR.SOURCE",
+});
 
 function App({ Component, pageProps }: AppProps) {
-  const [mounted, setMounted] = React.useState(false);
-  const page = React.useRef("");
-  const router = useRouter();
-  const curPage = router.pathname.split("/")[1];
-  page.current = curPage;
-  React.useEffect(() => {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
     setMounted(true);
   }, []);
   return (
