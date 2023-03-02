@@ -10,5 +10,10 @@ module.exports = {
       },
     },
   },
-  plugins: ["tailwindcss", "autoprefixer", "@tailwindcss/forms"],
+  plugins: [
+    "tailwindcss",
+    "autoprefixer",
+    "@tailwindcss/forms",
+    "@tailwindcss/aspect-ratio",
+  ],
 };
