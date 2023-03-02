@@ -1,34 +1,63 @@
+import { OpenSeaSafelistRequestStatus } from "alchemy-sdk/dist/esm/src/types/types";
+import { Dispatch, SetStateAction } from "react";
+
 export interface Collection {
   name: string;
-  logo: string;
-  CollectionDescription: string;
-  floorPrice: number;
-  verified: string;
-  externalUrl: string;
-  twitter: string;
-  discord: string;
+  logo: string | undefined;
+  collectionDescription: string | undefined;
+  floorPrice: number | undefined;
+  verified: OpenSeaSafelistRequestStatus | undefined;
+  externalUrl: string | undefined;
+  twitterHandle: string | undefined;
+  discord: string | undefined;
   nfts: NFT[];
 }
 
 export interface MarketplaceInfo {
-  name: string;
-  icon: string;
-  assetPage: string;
+  name: string | undefined;
+  icon: string | undefined;
+  assetPage: string | undefined;
+}
+// needs to be updated
+export interface OrganizedTraits {
+  [traitType: string]: Record<string, Record<string, TraitStatus>>;
 }
 
-export interface Traits {
+export interface Trait {
   value: string;
-  value_type: string;
+  trait_type: string;
+}
+
+export interface TraitStatus {
+  count: number;
+  checked: boolean;
+}
+
+export interface TraitInfo {
+  name: string;
+  checked: boolean;
+}
+
+export interface UpdateTraitState {
+  (
+    traits: Record<string, Record<string, TraitStatus>>,
+    updatedTrait: TraitInfo
+  ): void;
+}
+
+export interface UpdateSlideOverState {
+  (): boolean;
 }
 
 export interface NFT {
   name: string;
-  image: string;
-  description: string;
-  traits: Traits[];
+  image: string | undefined;
+  description: string | undefined;
+  traits: Trait[] | undefined;
   tokenId: string;
-  price: number;
-  marketplace: MarketplaceInfo;
+  price: number | undefined;
+  marketplace: MarketplaceInfo | undefined;
+  maker: string | undefined;
 }
 
 export type PropsObject = {
@@ -102,4 +131,11 @@ export interface Order {
 export interface OrdersResponse {
   orders: Order[];
   continuation: string;
+}
+
+export interface FilterStateProps {
+  openSlideOver: boolean;
+  handleFilterChange: UpdateTraitState;
+  handleSlideOverChange: UpdateSlideOverState;
+  collection: Collection;
 }
