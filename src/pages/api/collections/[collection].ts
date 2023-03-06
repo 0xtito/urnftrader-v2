@@ -1,23 +1,45 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { Alchemy, Network, Nft, NftMetadataBatchToken } from "alchemy-sdk";
-import { MarketplaceInfo, NFT, Traits, Collection } from "../../../interfaces";
+import { Alchemy, Network, NftMetadataBatchToken } from "alchemy-sdk";
 import { paths } from "@reservoir0x/reservoir-sdk";
+import { ethers } from "ethers";
 
-import { Order, OrdersResponse } from "../../../interfaces";
+import {
+  Order,
+  OrdersResponse,
+  NFT,
+  Trait,
+  Collection,
+  SimpleHashListingType,
+  ListingsResponse,
+} from "../../../interfaces";
+import { convertIpfsUrl } from "../../../utils";
 
-const settings = {
-  apiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY, // Replace with your Alchemy API Key.
-  network: Network.ETH_MAINNET, // Replace with your network.
-};
+// just for testing
+const useMainnet = true;
+let network: string = useMainnet ? "ethereum" : "polygon-mumbai";
+const settings = useMainnet
+  ? {
+      apiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY_MAINNET, // Replace with your Alchemy API Key.
+      network: Network.ETH_MAINNET, // Replace with your network.
+    }
+  : {
+      apiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY_GOERLI, // Replace with your Alchemy API Key.
+      network: Network.ETH_GOERLI, // Replace with your network.
+    };
 
-const reservoirKey = process.env.MAINNET_RESERVOIR_API_KEY || "";
+const reservoirKey =
+  (useMainnet
+    ? process.env.MAINNET_RESERVOIR_API_KEY
+    : process.env.GOERLI_RESERVOIR_API_KEY_) || "";
 const alchemy = new Alchemy(settings);
 
-const options = {
+const simpleHashKey = process.env.SIMPLEHASH_API_KEY || "";
+
+const options2 = {
   method: "GET",
   headers: {
-    accept: "*/*",
-    "x-api-key": reservoirKey,
+    accept: "application/json",
+    "X-API-KEY": simpleHashKey,
   },
 };
 
@@ -25,49 +47,63 @@ export default async function (req: NextApiRequest, res: NextApiResponse) {
   const url: string[] = req.url?.split("/") || [""];
   const address: string = url[url.length - 1];
 
+  const simpleHashUrl: string = `https://api.simplehash.com/api/v0/nfts/listings/${network}/${address}?marketplaces=opensea&order_by=price_asc&limit=50`;
+
   try {
-    // just fetching Pudgy Penguins
-    const listedNfts: OrdersResponse = await (
-      await fetch(
-        `https://api.reservoir.tools/orders/asks/v4?tokenSetId=contract%3A0xBd3531dA5CF5857e7CfAA92426877b022e612cf8`,
-        options
-      )
+    const listedNfts: ListingsResponse = await (
+      await fetch(simpleHashUrl, options2)
     ).json();
 
-    listedNfts.orders.sort((a: Order, b: Order) => {
-      return Number(a.price.amount.raw) - Number(b.price.amount.raw);
-    });
+    // listedNfts.listings.sort(
+    //   (a: SimpleHashListingType, b: SimpleHashListingType) => {
+    //     return a.price - b.price;
+    //   }
+    // );
 
-    const tokens: NftMetadataBatchToken[] = listedNfts.orders.map((nft) => {
+    const tokens: NftMetadataBatchToken[] = listedNfts.listings.map((nft) => {
+      const [network, contractAddress, tokenId] = nft.nft_id.split(".");
       return {
-        contractAddress: nft.contract,
-        tokenId: nft.criteria.data.token.tokenId,
+        contractAddress,
+        tokenId,
       };
     });
 
     const allNftsMetadata = await alchemy.nft.getNftMetadataBatch(tokens);
 
-    // An array of nfts listed from a specific collection +
-    // with all necessary metadata
     const nfts: NFT[] = allNftsMetadata.map((nft, i) => {
       // nft metadata from alchemy
-      const nftListing = listedNfts.orders.find((order) => {
-        return order.tokenSetId.split(":")[2] == nft.tokenId;
-      });
+      const nftListing: SimpleHashListingType | undefined =
+        listedNfts.listings.find((order) => {
+          const [network, contractAddress, tokenId] = order.nft_id.split(".");
+          return tokenId == nft.tokenId;
+        });
+
+      // if (nftListing && nftListing?.price.toString().split(".")[1].length > 3) {
+      //   Number(ethers.utils.formatUnits(nftListing?.price)).toFixed(3);
+      // }
+
+      // console.log(nftListing?.price.toString().split("."));
+      // (nftListing &&
+      //   nftListing?.price.toString().split(".")[1].length > 3
+      //     ? Number(
+      //         Number(ethers.utils.formatUnits(nftListing?.price)).toFixed(3)
+      //       )
+      //     : nftListing?.price) as number,
+
       // const nftListing = listedNfts.orders[i];
       return {
         name: nft.title,
-        image: nft.rawMetadata?.image,
+        image: convertIpfsUrl(nft.rawMetadata?.image as string),
         description: nft.rawMetadata?.description,
-        traits: nft.rawMetadata?.attributes,
+        traits: nft.rawMetadata?.attributes as Trait[],
         tokenId: nft.tokenId,
-        price: nftListing?.price.amount.decimal,
+        price: nftListing?.price,
         marketplace: {
-          name: nftListing?.source.name as string | undefined,
-          icon: nftListing?.source.icon as string | undefined,
-          assetPage: nftListing?.source.url as string | undefined,
+          name: nftListing?.marketplace_id as string | undefined,
+          icon: "opensea" as string | undefined,
+          assetPage: nftListing?.permalink as string | undefined,
         },
-        maker: nftListing?.maker,
+        maker: nftListing?.seller_address,
       };
     });
 
@@ -82,10 +118,15 @@ export default async function (req: NextApiRequest, res: NextApiResponse) {
       discord: allNftsMetadata[0].contract.openSea?.discordUrl,
       nfts,
     };
+
+    console.log("new call");
+
     return nfts
       ? res.status(200).json(collection)
       : res.status(500).json({ message: "data not found" });
   } catch (err) {
+    console.log(err);
+    console.trace();
     res.status(500).json(err);
   }
 }
