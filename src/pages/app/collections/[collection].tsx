@@ -3,7 +3,10 @@ import useSWR, { Key, MutatorCallback } from "swr";
 import useSWRMutation from "swr/mutation";
 import Link from "next/link";
 import ContentLoader from "react-content-loader";
-import { useState, Fragment, createContext, useEffect, useRef } from "react";
+import { useState, Fragment, useEffect, useRef } from "react";
+import { useRouter } from "next/router";
+import { GetServerSidePropsContext, NextPage } from "next";
+import { ParsedUrlQuery } from "querystring";
 
 import {
   Collection,
@@ -32,25 +35,28 @@ const settings = {
 const alchemy = new Alchemy(settings);
 
 /**
- * TESTING - NOT WHAT THE PAGE WILL BE
  * This will be the default page for the collection page
  * This will display the Pudgy Penguins at first
  * Will evolve to display trending/hottest NFTs
  */
 // pudgy penguin contract: 0xBd3531dA5CF5857e7CfAA92426877b022e612cf8
 
-const fetchListedItems = (url: string) => fetch(url).then((res) => res.json());
+interface CollectionRouterQuery {
+  collection: string;
+}
 
-export default function CollectionsIndexPage() {
+interface CollectionPageProps {
+  id: string;
+}
+
+export default function CollectionPage(props: CollectionPageProps) {
   const [openSlideOver, setOpenSlideOver] = useState(false);
   const [collectionData, setCollectionData] = useState<Collection | null>(null);
-  // const filteredTraits = useRef<Record<string, Record<string, TraitStatus>>>(
-  //   {}
-  // );
   const [filteredTraits, setFilteredTraits] = useState<
     Record<string, Record<string, TraitStatus>>
   >({});
-  let traits: Record<string, Record<string, TraitStatus>>;
+
+  const { id } = props;
 
   const handleSlideOverChange = () => {
     setOpenSlideOver(!openSlideOver);
@@ -71,11 +77,13 @@ export default function CollectionsIndexPage() {
     setFilteredTraits(traits);
   };
 
-  const defaultCollection: boolean = true;
+  const defaultCollection: boolean = false;
+  const fetchListedItems = (url: string) =>
+    fetch(url).then((res) => res.json());
 
   const uid: string = defaultCollection
     ? "/api/collections/0xBd3531dA5CF5857e7CfAA92426877b022e612cf8"
-    : `/api/collections/${"hey"}`;
+    : `/api/collections/${id}`;
 
   const {
     data,
@@ -112,6 +120,18 @@ export default function CollectionsIndexPage() {
         }
       >
         <ContentLoader />
+      </MainAppLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <MainAppLayout
+        sideBarJSX={
+          <div className="h-full rounded-lg border-2 border-dashed border-gray-200" />
+        }
+      >
+        <p>error</p>
       </MainAppLayout>
     );
   }
@@ -161,4 +181,15 @@ export default function CollectionsIndexPage() {
       </FilterStatus.Provider>
     );
   }
+}
+
+export async function getServerSideProps(context: GetServerSidePropsContext) {
+  // Fetch data and return props
+  // const data = await fetchMyData();
+  const id = context.query.collection as string;
+  return {
+    props: {
+      id,
+    },
+  };
 }

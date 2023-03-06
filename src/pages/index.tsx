@@ -1,6 +1,5 @@
 import Link from "next/link";
-import LandingPageLayout from "../layouts/LandingPageLayout";
-import MainAppLayout from "../layouts/MainAppLayout";
+import { LandingPageLayout } from "../layouts";
 
 function Page() {
   return (
