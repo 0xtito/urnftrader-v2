@@ -1,2 +1,4 @@
-export { getActiveFilters } from "./getActiveFilters";
-export { getOrganizedTraits } from "./getOrganizedTraits";
+export * from "./getActiveFilters";
+export * from "./getOrganizedTraits";
+export * from "./convertIpfsUrl";
+export * from "./findWalletIcon";
