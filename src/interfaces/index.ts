@@ -133,9 +133,54 @@ export interface OrdersResponse {
   continuation: string;
 }
 
+export interface SimpleHashListingType {
+  id: string;
+  permalink: string;
+  bundle_item_number: number | null;
+  listing_timestamp: string;
+  expiration_timestamp: string;
+  seller_address: string;
+  auction_type: string | null;
+  quantity: number;
+  quantity_remaining: number;
+  price: number;
+  marketplace_id: string;
+  collection_id: string | null;
+  nft_id: string;
+  payment_token: PaymentToken | null;
+}
+
+export interface PaymentToken {
+  payment_token_id: string;
+  name: string | null;
+  symbol: string | null;
+  address: string | null;
+  decimals: number;
+}
+
+export interface ListingsResponse {
+  next_cursor: string | null;
+  next: string | null;
+  previous: string | null;
+  listings: SimpleHashListingType[];
+}
+
+export interface RefreshCollectionData {
+  startRefresh: () => void;
+  isValidating: boolean;
+}
+
 export interface FilterStateProps {
   openSlideOver: boolean;
   handleFilterChange: UpdateTraitState;
   handleSlideOverChange: UpdateSlideOverState;
   collection: Collection;
+}
+
+export interface CollectionStateProps extends FilterStateProps {
+  handleRefreshData: RefreshCollectionData;
+}
+
+export interface IconProp {
+  className?: string;
 }
