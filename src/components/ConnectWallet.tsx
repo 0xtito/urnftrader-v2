@@ -2,7 +2,6 @@ import { Fragment, useEffect, useState } from "react";
 import { Dialog, Transition, Menu } from "@headlessui/react";
 
 import { useAccount, useConnect, useDisconnect, useEnsName } from "wagmi";
-import { Account, Connect, NetworkSwitcher } from "../components";
 
 const userNavigation = [
   { name: "Profile", href: "/app/user" },
@@ -10,7 +9,7 @@ const userNavigation = [
   { name: "Disconnect", href: "#" },
 ];
 
-function classNames(...classes: any[]) {
+function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
 

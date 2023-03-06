@@ -6,7 +6,6 @@ export function Connect() {
   const { connect, connectors, error, isLoading, pendingConnector } =
     useConnect();
   const { disconnect } = useDisconnect();
-  console.log(connector);
 
   return (
     <Fragment>
