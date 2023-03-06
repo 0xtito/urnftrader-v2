@@ -1,4 +1,4 @@
-export { CollectionsLayout } from "./CollectionsLayout";
-export { DashboardLayout } from "./DashboardLayout";
-export { LandingPageLayout } from "./LandingPageLayout";
-export { MainAppLayout } from "./MainAppLayout";
+export * from "./MainAppLayout";
+export * from "./DashboardLayout";
+export * from "./LandingPageLayout";
+export * from "./FrontPageLayout";

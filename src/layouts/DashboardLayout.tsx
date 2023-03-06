@@ -6,7 +6,7 @@ import {
   ConnectWallet,
 } from "../components";
 import Link from "next/link";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useState, useRef, FormEvent } from "react";
 import { Dialog, Menu, Transition } from "@headlessui/react";
 import {
   Bars3BottomLeftIcon,
@@ -16,6 +16,7 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
+import { useRouter } from "next/router";
 
 const navigation = [
   { name: "Profile", href: "#", icon: HomeIcon, current: false },
@@ -29,12 +30,6 @@ const navigation = [
   { name: "Watchlist", href: "#", icon: FolderIcon, current: false },
 ];
 
-const userNavigation = [
-  { name: "Profile", href: "/user", current: false },
-  { name: "Settings", href: "#" },
-  { name: "Disconnect", href: "#" },
-];
-
 function classNames(...classes: any[]) {
   return classes.filter(Boolean).join(" ");
 }
@@ -44,11 +39,18 @@ type Props = {
   page: string;
 };
 
-export default function DashboardLayout(props: Props) {
+export function DashboardLayout(props: Props) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { connector, isConnected, address } = useAccount();
   const [userAddress, setUserAddress] = useState("");
   const { data: ensName } = useEnsName({ address });
+  const router = useRouter();
+  const search = useRef("");
+
+  const handleSearch = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    router.push(`app/collections/${search.current}`);
+  };
 
   useEffect(() => {
     if (ensName) {
@@ -209,7 +211,7 @@ export default function DashboardLayout(props: Props) {
           </button>
           <div className="flex flex-1 justify-between px-4">
             <div className="flex flex-1">
-              <form className="flex w-full lg:ml-0" action="#" method="GET">
+              <form className="flex w-full lg:ml-0" onSubmit={handleSearch}>
                 <label htmlFor="search-field" className="sr-only">
                   Search
                 </label>
@@ -226,6 +228,7 @@ export default function DashboardLayout(props: Props) {
                     placeholder="Search"
                     type="search"
                     name="search"
+                    onChange={(e) => (search.current = e.target.value)}
                   />
                 </div>
               </form>

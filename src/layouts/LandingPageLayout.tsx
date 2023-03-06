@@ -1,12 +1,10 @@
-import React from "react";
+import React, { Fragment } from "react";
 import { PropsObject } from "../interfaces";
 
-function LandingPageLayout(props: PropsObject) {
+export function LandingPageLayout(props: PropsObject) {
   return (
-    <html className="h-full bg-gray-900">
-      <body className="h-full">{props.children}</body>
-    </html>
+    <Fragment>
+      <div className="h-full">{props.children}</div>
+    </Fragment>
   );
 }
-
-export default LandingPageLayout;
