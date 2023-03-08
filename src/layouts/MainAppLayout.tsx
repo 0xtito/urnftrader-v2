@@ -1,5 +1,4 @@
-import { Fragment, useState, useEffect, useRef, FormEvent } from "react";
-import { useAccount, useConnect, useDisconnect, useEnsName } from "wagmi";
+import { Fragment, useState, useRef, FormEvent, useEffect } from "react";
 import { useRouter } from "next/router";
 import { Dialog, Transition, Menu } from "@headlessui/react";
 import {
@@ -9,27 +8,22 @@ import {
   XMarkIcon,
   UsersIcon,
   FolderIcon,
-  UserIcon,
+  CircleStackIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
+
+import { MainAppProps } from "../interfaces";
 import { ConnectWallet } from "../components";
 
 function classNames(...classes: any[]) {
   return classes.filter(Boolean).join(" ");
 }
 
-type Props = {
-  children: JSX.Element;
-  sideBarJSX?: JSX.Element;
-};
-
-export function MainAppLayout(props: Props) {
+export function MainAppLayout(props: MainAppProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { connector, isConnected, address } = useAccount();
-  const [userAddress, setUserAddress] = useState("");
-  const { data: ensName } = useEnsName({ address });
 
   const router = useRouter();
+  const activePage = useRef("Home");
   const search = useRef("");
 
   const navigation = [
@@ -37,39 +31,28 @@ export function MainAppLayout(props: Props) {
       name: "Home",
       href: router.pathname.startsWith("app") ? "app/collections" : "/app/home",
       icon: HomeIcon,
-      current: false,
+      current: activePage.current === "Home" ? true : false,
     },
-    { name: "Profile", href: "#", icon: UserIcon, current: false },
     {
       name: "Collections",
       href: router.pathname.startsWith("app")
         ? "/collections"
         : "/app/collections",
-      icon: UsersIcon,
-      current: true,
+      icon: CircleStackIcon,
+      current: activePage.current === "Collections" ? true : false,
     },
-    { name: "Watchlist", href: "#", icon: FolderIcon, current: false },
   ];
 
-  // console.log(router.pathname);
+  useEffect(() => {
+    activePage.current =
+      router.pathname.split("/")[2].charAt(0).toUpperCase() +
+      router.pathname.split("/")[2].slice(1);
+  }, [router.pathname]);
 
   const handleSearch = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
-    // if (router.pathname.startsWith("/app/collections")) {
-    //   router.push(`/collections/${search.current}`);
-    // } else if (router.pathname.startsWith("/app/home")) {
-    //   router.push(`/collections/${search.current}`);
-    // }
+    router.push(`collections/${search.current}`);
   };
-
-  useEffect(() => {
-    if (ensName) {
-      setUserAddress(ensName);
-    } else {
-      setUserAddress(`${address?.slice(0, 6)}...`);
-    }
-  }, [isConnected]);
 
   return (
     <Fragment>
@@ -127,7 +110,7 @@ export function MainAppLayout(props: Props) {
                     </div>
                   </Transition.Child>
                   <div className="flex flex-shrink-0 items-center px-4">
-                    <Link key="home" href="/app">
+                    <Link key="home" href="/app/home">
                       <img
                         className="h-8 w-auto"
                         src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=500"
@@ -139,6 +122,7 @@ export function MainAppLayout(props: Props) {
                     <nav className="space-y-1 px-2">
                       {navigation.map((item) => (
                         <Link
+                          // onClick={() => setActivePage(item.name)}
                           key={item.name}
                           href={item.href}
                           className={classNames(
@@ -149,6 +133,7 @@ export function MainAppLayout(props: Props) {
                           )}
                         >
                           <item.icon
+                            // onClick={() => setActivePage(item.name)}
                             className={classNames(
                               item.current
                                 ? "text-gray-300"
@@ -177,7 +162,7 @@ export function MainAppLayout(props: Props) {
             {/* Sidebar component, swap this element with another sidebar if you like */}
             <div className="flex min-h-0 flex-1 flex-col bg-gray-800">
               <div className="flex h-16 flex-shrink-0 items-center bg-gray-900 px-4">
-                <Link key="home" href="/app">
+                <Link key="home" href="/app/home">
                   <img
                     className="h-8 w-auto"
                     src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=500"
@@ -189,6 +174,7 @@ export function MainAppLayout(props: Props) {
                 <nav className="flex-1 space-y-1 px-2 py-4">
                   {navigation.map((item) => (
                     <Link
+                      // onClick={() => setActivePage(item.name)}
                       key={item.name}
                       href={item.href}
                       className={classNames(
@@ -199,6 +185,7 @@ export function MainAppLayout(props: Props) {
                       )}
                     >
                       <item.icon
+                        // onClick={() => setActivePage(item.name)}
                         className={classNames(
                           item.current
                             ? "text-gray-300"
