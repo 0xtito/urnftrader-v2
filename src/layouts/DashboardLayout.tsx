@@ -1,10 +1,5 @@
 import { useAccount, useConnect, useDisconnect, useEnsName } from "wagmi";
-import {
-  Account,
-  Connect,
-  NetworkSwitcher,
-  ConnectWallet,
-} from "../components";
+import { ConnectWallet } from "../components";
 import Link from "next/link";
 import { Fragment, useEffect, useState, useRef, FormEvent } from "react";
 import { Dialog, Menu, Transition } from "@headlessui/react";
