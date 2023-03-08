@@ -33,7 +33,6 @@ export function OrderSection() {
             value="buy"
             className="relative inline-flex items-center rounded-l-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10"
             onClick={(e) => {
-              // e.currentTarget.classList.add("bg-green-300");
               setBuyActive(true);
             }}
           >
@@ -142,8 +141,6 @@ export function OrderSection() {
           <div className="w-3/4 border-t border-gray-300 " />
         </div>
       </div>
-      {/* <div className="flex flex-row-reverse "></div> */}
-
       <div className="rounded-lg border-gray-400 border-2 border-opacity-25 divide-x-4 divide-y-4">
         {buyActive ? <BuySection /> : <SellSection />}
       </div>

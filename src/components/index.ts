@@ -1,6 +1,3 @@
-export * from "./Account";
-export * from "./Connect";
-export * from "./NetworkSwitcher";
 export * from "./ConnectWallet";
 export * from "./CollectionHeader";
 export * from "./FilterSlideOver";
@@ -10,3 +7,5 @@ export * from "./SellSection";
 export * from "./NftCatalogue";
 export * from "./SignIn";
 export * from "./WalletDropDown";
+export * from "./UserHomePage";
+export * from "./UserHomePageHeader";

@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useState } from "react";
-import { Dialog, Transition, Menu } from "@headlessui/react";
+import { Transition, Menu } from "@headlessui/react";
 
-import { useAccount, useConnect, useDisconnect, useEnsName } from "wagmi";
+import { useAccount, useConnect, useDisconnect } from "wagmi";
 
 const userNavigation = [
   { name: "Profile", href: "/app/user" },
@@ -16,17 +16,12 @@ function classNames(...classes: string[]) {
 export function ConnectWallet() {
   const { connector, isConnected, address } = useAccount();
   const [userAddress, setUserAddress] = useState("");
-  const { data: ensName } = useEnsName({ address });
   const { connect, connectors, error, isLoading, pendingConnector } =
     useConnect();
   const { disconnect } = useDisconnect();
 
   useEffect(() => {
-    if (ensName) {
-      setUserAddress(ensName);
-    } else {
-      setUserAddress(`${address?.slice(0, 6)}...`);
-    }
+    setUserAddress(`${address?.slice(0, 6)}...`);
   }, [isConnected]);
 
   return (

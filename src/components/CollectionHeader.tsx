@@ -1,19 +1,9 @@
 import { Fragment, useState, useContext, useEffect } from "react";
-import {
-  Dialog,
-  Disclosure,
-  Menu,
-  Popover,
-  Transition,
-} from "@headlessui/react";
-import { XMarkIcon, CheckIcon } from "@heroicons/react/24/outline";
-import {
-  ChevronDownIcon,
-  ChevronLeftIcon,
-  ChevronUpIcon,
-} from "@heroicons/react/20/solid";
+import { Dialog, Disclosure, Menu, Transition } from "@headlessui/react";
+import { XMarkIcon } from "@heroicons/react/24/outline";
+import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/20/solid";
 
-import { Collection, CollectionStateProps } from "../interfaces";
+import { CollectionStateProps } from "../interfaces";
 import { FilterStatus } from "../contexts/FilterStatus";
 import { getActiveFilters } from "../utils/getActiveFilters";
 
@@ -42,16 +32,12 @@ export function CollectionHeader(props: CollectionStateProps) {
   const traits = useContext(FilterStatus);
   const [openSort, setOpenSort] = useState(false);
   const [showFullText, setShowFullText] = useState(false);
-  // const [activeFilters, setActiveFilters] = useState<
-  //   { value: string; label: string }[]
-  // >([]);
 
   const { startRefresh, isValidating } = props.handleRefreshData;
 
   let activeFilters = getActiveFilters(traits);
 
   useEffect(() => {
-    // setActiveFilters(getActiveFilters(traits));
     activeFilters = getActiveFilters(traits);
   }, [traits]);
 
@@ -63,16 +49,7 @@ export function CollectionHeader(props: CollectionStateProps) {
     handleRefreshData,
   } = props;
 
-  const {
-    name,
-    logo,
-    collectionDescription,
-    floorPrice,
-    verified,
-    externalUrl,
-    twitterHandle,
-    discord,
-  } = collection;
+  const { name, collectionDescription } = collection;
 
   const maxLength: number = 100;
   const trimmedDescription: string = `${collectionDescription?.slice(
