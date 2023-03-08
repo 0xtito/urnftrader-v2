@@ -1,74 +1,71 @@
 import { configureChains, createClient } from "wagmi";
 import { goerli, mainnet, polygonMumbai } from "wagmi/chains";
+import { alchemyProvider } from "@wagmi/core/providers/alchemy";
 import { CoinbaseWalletConnector } from "wagmi/connectors/coinbaseWallet";
-import { InjectedConnector } from "wagmi/connectors/injected";
 import { MetaMaskConnector } from "wagmi/connectors/metaMask";
 import { WalletConnectConnector } from "wagmi/connectors/walletConnect";
-// import {
-//   GoogleSocialWalletConnector,
-//   GithubSocialWalletConnector,
-//   DiscordSocialWalletConnector,
-//   TwitterSocialWalletConnector,
-// } from "@zerodevapp/wagmi";
-// import { getPrivateKeyOwner } from "@zerodevapp/sdk";
-// import { ZeroDevConnector } from "@zerodevapp/wagmi";
+import {
+  FacebookSocialWalletConnector,
+  GoogleSocialWalletConnector,
+  GithubSocialWalletConnector,
+  DiscordSocialWalletConnector,
+  TwitterSocialWalletConnector,
+  enhanceConnectorWithAA,
+} from "@zerodevapp/wagmi";
+
+// testing
+const useMainnet = true;
 
 import { publicProvider } from "wagmi/providers/public";
 
 const { chains, provider, webSocketProvider } = configureChains(
+  [mainnet, ...(process.env.NODE_ENV === "development" ? [polygonMumbai] : [])],
   [
-    mainnet,
-    ...(process.env.NODE_ENV === "development" ? [polygonMumbai, goerli] : []),
-  ],
-  [publicProvider()]
+    publicProvider(),
+    alchemyProvider({
+      apiKey: useMainnet
+        ? process.env.NEXT_PUBLIC_ALCHEMY_API_KEY_MAINNET!
+        : process.env.NEXT_PUBLIC_ALCHEMY_API_KEY_MUMBAI!,
+    }),
+  ]
 );
 
 const options = {
-  options: { projectId: "b5486fa4-e3d9-450b-8428-646e757c10f6" },
+  options: {
+    projectId: useMainnet
+      ? process.env.NEXT_PUBLIC_ZERODEV_KEY_MAINNET!
+      : process.env.NEXT_PUBLIC_ZERODEV_KEY_MUMBAI!,
+  },
+  chains,
 };
 
 export const client = createClient({
   autoConnect: true,
   connectors: [
-    new MetaMaskConnector({ chains }),
-    new CoinbaseWalletConnector({
-      chains,
-      options: {
-        appName: "UrNFTrader",
-      },
-    }),
-    new WalletConnectConnector({
-      chains,
-      options: {
-        qrcode: true,
-      },
-    }),
-    // new ZeroDevConnector({
-    //   chains,
-    //   options: {
-    //     projectId: "UrNFTrader",
-    //   },
-    // }),
-    // new GoogleSocialWalletConnector(options),
-    // new GithubSocialWalletConnector(options),
-    // new GithubSocialWalletConnector({
-    //   chains,
-    //   options: {
-    //     projectId: "UrNFTrader",
-    //   },
-    // }),
-    // new DiscordSocialWalletConnector({
-    //   chains,
-    //   options: {
-    //     projectId: "UrNFTrader",
-    //   },
-    // }),
-    // new TwitterSocialWalletConnector({
-    //   chains,
-    //   options: {
-    //     projectId: "UrNFTrader",
-    //   },
-    // }),
+    enhanceConnectorWithAA(new MetaMaskConnector({ chains }), options.options),
+    enhanceConnectorWithAA(
+      new CoinbaseWalletConnector({
+        chains,
+        options: {
+          appName: "UrNFTrader",
+        },
+      }),
+      options.options
+    ),
+    enhanceConnectorWithAA(
+      new WalletConnectConnector({
+        chains,
+        options: {
+          qrcode: true,
+        },
+      }),
+      options.options
+    ),
+    new GoogleSocialWalletConnector(options),
+    new GithubSocialWalletConnector(options),
+    new DiscordSocialWalletConnector(options),
+    new TwitterSocialWalletConnector(options),
+    new FacebookSocialWalletConnector(options),
   ],
   provider,
   webSocketProvider,
