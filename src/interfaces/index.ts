@@ -13,6 +13,11 @@ export interface Collection {
   nfts: NFT[];
 }
 
+export interface MainAppProps {
+  children: JSX.Element;
+  sideBarJSX?: JSX.Element;
+}
+
 export interface MarketplaceInfo {
   name: string | undefined;
   icon: string | undefined;
