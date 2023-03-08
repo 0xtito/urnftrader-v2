@@ -4,7 +4,7 @@ import { LandingPageLayout } from "../layouts";
 function Page() {
   return (
     <LandingPageLayout>
-      <div className="relative isolate overflow-hidden bg-gray-900">
+      <div className="relative isolate overflow-hidden bg-gray-900 h-screen w-screen">
         <svg
           className="absolute inset-0 -z-10 h-full w-full stroke-white/10 [mask-image:radial-gradient(100%_100%_at_top_right,white,transparent)]"
           aria-hidden="true"
@@ -58,8 +58,8 @@ function Page() {
             </linearGradient>
           </defs>
         </svg>
-        <div className="mx-auto max-w-7xl px-6 pt-10 pb-24 sm:pb-32 lg:flex lg:py-40 lg:px-8">
-          <div className="mx-auto max-w-2xl flex-shrink-0 lg:mx-0 lg:max-w-xl lg:pt-8">
+        <div className="mx-auto max-w-7xl px-6 pt-10 pb-24 sm:pb-32 place-content-center lg:flex lg:py-40 lg:px-8">
+          <div className="mx-auto max-w-2xl flex-shrink-0  lg:mx-0 lg:max-w-xl lg:pt-8">
             <img
               className="h-11"
               src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=500"
@@ -88,17 +88,6 @@ function Page() {
               >
                 Learn more <span aria-hidden="true">→</span>
               </Link>
-            </div>
-          </div>
-          <div className="mx-auto mt-16 flex max-w-2xl sm:mt-24 lg:ml-10 lg:mt-0 lg:mr-0 lg:max-w-none lg:flex-none xl:ml-32">
-            <div className="max-w-3xl flex-none sm:max-w-5xl lg:max-w-none">
-              <img
-                src="https://tailwindui.com/img/component-images/dark-project-app-screenshot.png"
-                alt="App screenshot"
-                width={2432}
-                height={1442}
-                className="w-[76rem] rounded-md bg-white/5 shadow-2xl ring-1 ring-white/10"
-              />
             </div>
           </div>
         </div>

@@ -1,6 +1,8 @@
-import { ethers } from "ethers";
+import { createPublicClient, http } from "viem";
+import { mainnet, polygonMumbai } from "viem/chains";
 import { Fragment, useState, FormEvent, useRef, useEffect } from "react";
 import { Dialog, Menu, Transition } from "@headlessui/react";
+import { useAccount, useConnect, useDisconnect } from "wagmi";
 import {
   Bars3BottomLeftIcon,
   BellIcon,
@@ -15,9 +17,12 @@ import {
 } from "@heroicons/react/24/outline";
 import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
 import { useRouter } from "next/router";
+import { GetServerSidePropsContext } from "next";
+import useSWR, { MutatorCallback } from "swr";
 
-import { ConnectWallet, SignIn } from "../../components";
-import { MainAppLayout } from "../../layouts";
+import { ConnectWallet, SignIn, UserHomePage } from "../../../components";
+import { MainAppLayout } from "../../../layouts";
+import { OwnedNft } from "alchemy-sdk/dist/esm/src/types/types";
 
 const userNavigation = [
   { name: "Your Profile", href: "#" },
@@ -29,6 +34,13 @@ function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
 
+const client = createPublicClient({
+  chain: polygonMumbai,
+  transport: http(),
+});
+
+const fetchListedItems = (url: string) => fetch(url).then((res) => res.json());
+
 export default function Home() {
   /**
    * This page will be the default page for users.
@@ -38,11 +50,42 @@ export default function Home() {
    *          - active/completed orders
    *          - there nft collection
    */
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
+  const { connector, isConnected, address } = useAccount();
+  const [userAddress, setUserAddress] = useState("");
+  const {
+    connect,
+    connectors,
+    error: walletConnectError,
+    pendingConnector,
+  } = useConnect();
   const router = useRouter();
   const search = useRef("");
+
+  interface OwnedNftsSWR {
+    data: OwnedNft[];
+    isLoading: boolean;
+    isValidating: boolean;
+    error: any;
+    mutate: MutatorCallback;
+  }
+
+  const {
+    data,
+    isLoading,
+    isValidating,
+    error: dataFetchError,
+    mutate,
+  }: OwnedNftsSWR = useSWR(
+    isConnected && address
+      ? `/api/users/nfts/0xD2128b1C22Bb80a4dae69fe149cD6fE9Ba7eB4aa`
+      : null,
+    fetchListedItems,
+    { revalidateOnFocus: false }
+  );
+
+  //   useEffect(() => {
+  //     console.log(isConnected);
+  //   }, [isConnected]);
 
   const navigation = [
     { name: "Home", href: "#", icon: HomeIcon, current: false },
@@ -67,15 +110,25 @@ export default function Home() {
     router.push(search.current);
   };
 
-  useEffect(() => {}, []);
-
   return (
     <MainAppLayout>
       <Fragment>
-        <SignIn />
+        {isConnected ? (
+          <UserHomePage nfts={data} isLoading={isLoading} />
+        ) : (
+          <SignIn />
+        )}
       </Fragment>
     </MainAppLayout>
   );
 }
 
-// export function getServerSideProps() {}
+// export async function getServerSideProps(context: GetServerSidePropsContext) {
+//   // Fetch data and return props
+//   // const data = await fetchMyData();
+//   console.log(context.req.);
+//   const id = context.query.collection as string;
+//   return {
+//     props: {},
+//   };
+// }

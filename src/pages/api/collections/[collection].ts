@@ -1,7 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { Alchemy, Network, NftMetadataBatchToken } from "alchemy-sdk";
-import { paths } from "@reservoir0x/reservoir-sdk";
-import { ethers } from "ethers";
 
 import {
   Order,
@@ -27,13 +25,9 @@ const settings = useMainnet
       network: Network.ETH_GOERLI, // Replace with your network.
     };
 
-const reservoirKey =
-  (useMainnet
-    ? process.env.MAINNET_RESERVOIR_API_KEY
-    : process.env.GOERLI_RESERVOIR_API_KEY_) || "";
 const alchemy = new Alchemy(settings);
 
-const simpleHashKey = process.env.SIMPLEHASH_API_KEY || "";
+const simpleHashKey = process.env.SIMPLEHASH_API_KEY!;
 
 const options2 = {
   method: "GET",
@@ -53,13 +47,6 @@ export default async function (req: NextApiRequest, res: NextApiResponse) {
     const listedNfts: ListingsResponse = await (
       await fetch(simpleHashUrl, options2)
     ).json();
-
-    // listedNfts.listings.sort(
-    //   (a: SimpleHashListingType, b: SimpleHashListingType) => {
-    //     return a.price - b.price;
-    //   }
-    // );
-
     const tokens: NftMetadataBatchToken[] = listedNfts.listings.map((nft) => {
       const [network, contractAddress, tokenId] = nft.nft_id.split(".");
       return {
@@ -77,20 +64,6 @@ export default async function (req: NextApiRequest, res: NextApiResponse) {
           const [network, contractAddress, tokenId] = order.nft_id.split(".");
           return tokenId == nft.tokenId;
         });
-
-      // if (nftListing && nftListing?.price.toString().split(".")[1].length > 3) {
-      //   Number(ethers.utils.formatUnits(nftListing?.price)).toFixed(3);
-      // }
-
-      // console.log(nftListing?.price.toString().split("."));
-      // (nftListing &&
-      //   nftListing?.price.toString().split(".")[1].length > 3
-      //     ? Number(
-      //         Number(ethers.utils.formatUnits(nftListing?.price)).toFixed(3)
-      //       )
-      //     : nftListing?.price) as number,
-
-      // const nftListing = listedNfts.orders[i];
       return {
         name: nft.title,
         image: convertIpfsUrl(nft.rawMetadata?.image as string),
